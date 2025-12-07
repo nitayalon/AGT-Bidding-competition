@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Competition-specific
+logs/*.json
+logs/*.txt
+results/*.json
+results/*.csv
+results/stage1/
+results/stage2/
+
+# Keep directory structure
+!logs/.gitkeep
+!results/.gitkeep
+
+# Student submissions (uncomment if you don't want to track teams)
+# teams/*/
+
+# Temporary files
+*.log
+*.tmp
+.pytest_cache/
+.coverage
+htmlcov/
