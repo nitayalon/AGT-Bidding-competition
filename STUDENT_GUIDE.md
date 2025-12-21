@@ -42,6 +42,23 @@ You should see: `✓ Agent validation PASSED`
 
 ## 🎯 Understanding the Competition
 
+### Educational Objectives
+
+This competition will test your understanding of:
+
+1. **Auction Theory** - Understanding second-price auction properties and strategic implications
+2. **Algorithmic Strategy** - Designing computational approaches to sequential decision-making
+3. **Budget Optimization** - Resource allocation under scarcity and uncertainty
+4. **Competitive Analysis** - Reasoning about opponent behavior and market dynamics
+5. **Information Economics** - Decision-making with partial information and limited market signals
+
+Key concepts to review:
+- **Truthful Bidding**: When is bidding your true value optimal in second-price auctions?
+- **Budget Constraints**: How do financial limitations change bidding strategies?
+- **Sequential Games**: Planning and adaptation in multi-round environments
+- **Information Asymmetry**: Using private valuations strategically
+- **Information Revelation**: Making inferences about others' behavior
+
 ### Competition Structure
 
 ```
@@ -61,13 +78,14 @@ Stage 2: Championship Round
 ```
 Pre-Game: You receive
 ├── Your valuation vector (20 items with values)
-├── List of 15 items that will be auctioned
 ├── Initial budget: 60 units
+├── Opponent team IDs
+└── Unknown: Which 15 items will be auctioned (learned online)
 └── Unknown: The order items will be auctioned
 
 During Game: For each of 15 rounds
-├── System announces which item is being auctioned
-├── You submit your bid (you have 2 seconds max)
+├── System announces which item is being auctioned (online revelation)
+├── You submit your bid (you have 3 seconds max)
 ├── Highest bidder wins, pays second-highest bid
 └── All agents learn: winner identity + price paid
 
@@ -79,7 +97,8 @@ Post-Game: Calculate utility
 
 - **Auction Type**: Second-price sealed-bid (Vickrey auction)
 - **Budget**: 60 units per game (does NOT carry over between games)
-- **Timeout**: 2 seconds per bid decision
+- **Timeout**: 3 seconds per bid decision
+- **Bid Precision**: All bids rounded to 2 decimal places
 - **Information**: After each round, you learn winner + price (NOT all bids)
 - **Scoring**: Total utility across all games in your stage
 
@@ -104,7 +123,7 @@ Every team must implement a class called `BiddingAgent` with these methods:
 ```python
 class BiddingAgent:
     def __init__(self, team_id: str, valuation_vector: dict, 
-                 budget: float, auction_items_sequence: list):
+                 budget: float, opponent_teams: list):
         """
         Initialize your agent at the start of each game.
         
@@ -113,9 +132,9 @@ class BiddingAgent:
             valuation_vector: Dict mapping item_id to your valuation
                 Example: {"item_0": 15.3, "item_1": 8.2, ..., "item_19": 12.7}
             budget: Initial budget (always 60)
-            auction_items_sequence: List of 15 item_ids that will be auctioned
-                Example: ["item_3", "item_7", "item_12", ...]
-                Note: You know WHICH items, not the ORDER
+            opponent_teams: List of opponent team IDs in the same arena
+                Example: ["Team_A", "Team_B", "Team_C", "Team_D"]
+                Use this to track and model each opponent separately
         """
         pass
     
@@ -132,11 +151,13 @@ class BiddingAgent:
                 - Must be >= 0
                 - Should be <= your current budget
                 - Bids over budget are automatically capped
+                - Bids are automatically rounded to 2 decimal places
         
         Important:
-            - You have 2 seconds maximum to return
+            - You have 3 seconds maximum to return
             - Timeout or error = bid of 0
             - This is a SECOND-PRICE auction: winner pays second-highest bid
+            - All bids are rounded to 2 decimal places (e.g., 15.678 → 15.68)
         """
         pass
     
@@ -168,7 +189,7 @@ self.team_id              # Your team identifier
 self.valuation_vector     # Your valuations for all 20 items
 self.budget               # Current remaining budget (updated automatically)
 self.initial_budget       # Starting budget (60)
-self.auction_items_sequence  # List of 15 items to be auctioned
+self.opponent_teams       # List of opponent team IDs in your arena
 self.utility              # Current utility (updated automatically)
 self.items_won            # List of items you've won (updated automatically)
 ```
@@ -200,20 +221,21 @@ from typing import Dict, List
 
 class BiddingAgent:
     def __init__(self, team_id: str, valuation_vector: Dict[str, float], 
-                 budget: float, auction_items_sequence: List[str]):
+                 budget: float, opponent_teams: List[str]):
         # Required attributes
         self.team_id = team_id
         self.valuation_vector = valuation_vector
         self.budget = budget
         self.initial_budget = budget
-        self.auction_items_sequence = auction_items_sequence
+        self.opponent_teams = opponent_teams
         self.utility = 0
         self.items_won = []
         
         # Your custom attributes here
         self.rounds_completed = 0
-        # Example: self.opponent_bids = {}
-        # Example: self.price_history = []
+        self.total_rounds = 15  # Always 15 rounds per game
+        # Example: self.opponent_bids = {opp: [] for opp in opponent_teams}
+        # Example: self.beliefs = {opp: {} for opp in opponent_teams}
         
     def _update_available_budget(self, item_id: str, winning_team: str, 
                                  price_paid: float):
@@ -307,8 +329,8 @@ python simulator.py --your-agent teams/your_team_name/bidding_agent.py \
                     --num-games 3 --verbose
 
 # Test with different random seeds for consistency
-python simulator.py --your-agent teams/your_team_name/bidding_agent.py \
-                    --num-games 10 --seed 42
+python simulator.py --your-agent teams/my_team/bidding_agent.py \
+                    --num-games 10 --seed 6431
 ```
 
 ### Analyze Your Performance
@@ -337,11 +359,12 @@ In a standard second-price auction (without budget constraints):
 
 ```python
 # Calculate how much budget per remaining round
-rounds_remaining = len(self.auction_items_sequence) - self.rounds_completed
-budget_per_round = self.budget / rounds_remaining
+total_rounds = 15  # Always 15 rounds per game
+rounds_remaining = total_rounds - self.rounds_completed
+budget_per_round = self.budget / rounds_remaining if rounds_remaining > 0 else 0
 
 # Be more aggressive as game progresses
-progress = self.rounds_completed / len(self.auction_items_sequence)
+progress = self.rounds_completed / total_rounds
 aggressiveness = 0.7 + (0.3 * progress)  # 70% to 100%
 ```
 
@@ -427,7 +450,7 @@ if rounds_remaining <= 3:
 
 ### 1. Timeout Errors
 
-**Problem**: Your `bidding_function` takes > 2 seconds
+**Problem**: Your `bidding_function` takes > 3 seconds
 ```python
 # BAD: Complex computation that might timeout
 def bidding_function(self, item_id):
@@ -599,7 +622,7 @@ your_team_name/
 - [ ] Validation passes: `python main.py --mode validate --validate your_agent.py`
 - [ ] No external dependencies beyond numpy, scipy, standard library
 - [ ] No file I/O, network access, or system calls
-- [ ] Agent runs in < 2 seconds per bid
+- [ ] Agent runs in < 3 seconds per bid
 - [ ] Code is well-commented
 - [ ] Team member names in header comment
 
@@ -638,19 +661,20 @@ from typing import Dict, List
 
 class BiddingAgent:
     def __init__(self, team_id: str, valuation_vector: Dict[str, float], 
-                 budget: float, auction_items_sequence: List[str]):
+                 budget: float, opponent_teams: List[str]):
         self.team_id = team_id
         self.valuation_vector = valuation_vector
         self.budget = budget
         self.initial_budget = budget
-        self.auction_items_sequence = auction_items_sequence
+        self.opponent_teams = opponent_teams
         self.utility = 0
         self.items_won = []
         
         # Strategy state
         self.rounds_completed = 0
+        self.total_rounds = 15
         self.price_history = []
-        self.opponent_wins = {}
+        self.opponent_wins = {opp: 0 for opp in opponent_teams}
         
         # Pre-compute some statistics
         self.my_avg_valuation = sum(valuation_vector.values()) / len(valuation_vector)
@@ -692,8 +716,7 @@ class BiddingAgent:
             max_market_price = 15.0
         
         # Calculate rounds remaining
-        total_rounds = len(self.auction_items_sequence)
-        rounds_remaining = total_rounds - self.rounds_completed
+        rounds_remaining = self.total_rounds - self.rounds_completed
         
         if rounds_remaining == 0:
             return 0
@@ -751,3 +774,4 @@ Remember:
 - Have fun and be creative!
 
 May the best strategy win! 🎯
+

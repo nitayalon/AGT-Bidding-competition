@@ -25,6 +25,9 @@ ARENA_SIZE = 5
 BID_TIMEOUT_SECONDS = 2.0
 MEMORY_LIMIT_MB = 256
 
+# Bid Precision
+BID_DECIMAL_PLACES = 2  # Bids rounded to 2 decimal places
+
 # Scoring
 SCORING_WEIGHTS = {
     "utility": 1.0,

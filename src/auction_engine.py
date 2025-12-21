@@ -51,9 +51,10 @@ class AuctionEngine:
         
         if bid > budget:
             logger.warning(f"Team {team_id}: Bid {bid:.2f} exceeds budget {budget:.2f}, capping to budget")
-            return budget, True
+            return round(budget, 2), True
         
-        return float(bid), False
+        # Round bid to 2 decimal places
+        return round(float(bid), 2), False
     
     def determine_winner(self, bids: Dict[str, float]) -> Tuple[str, float, List[str]]:
         """

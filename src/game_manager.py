@@ -93,12 +93,15 @@ class GameManager:
             
             # Load and initialize agents
             for team_id, agent_file in team_agents.items():
+                # Get list of opponent teams (all teams except current one)
+                opponent_teams = [tid for tid in team_ids if tid != team_id]
+                
                 agent = self.agent_manager.load_agent(
                     file_path=agent_file,
                     team_id=team_id,
                     valuation_vector=self.valuations[team_id],
                     budget=INITIAL_BUDGET,
-                    auction_items_sequence=self.auction_sequence.copy()
+                    opponent_teams=opponent_teams
                 )
                 
                 if agent is None:

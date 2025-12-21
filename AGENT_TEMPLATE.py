@@ -29,7 +29,7 @@ class BiddingAgent:
     """
     
     def __init__(self, team_id: str, valuation_vector: Dict[str, float], 
-                 budget: float, auction_items_sequence: List[str]):
+                 budget: float, opponent_teams: List[str]):
         """
         Initialize your agent at the start of each game.
         
@@ -38,33 +38,35 @@ class BiddingAgent:
             valuation_vector: Dict mapping item_id to your valuation
                 Example: {"item_0": 15.3, "item_1": 8.2, ..., "item_19": 12.7}
             budget: Initial budget (always 60)
-            auction_items_sequence: List of 15 item_ids that will be auctioned
-                Example: ["item_3", "item_7", "item_12", ...]
-                Note: You know WHICH items will be auctioned, but not the ORDER
+            opponent_teams: List of opponent team IDs competing in the same arena
+                Example: ["Team_A", "Team_B", "Team_C", "Team_D"]
+                This helps you track and model each opponent's behavior separately
         
         Important:
             - This is called once at the start of each game
             - You can initialize any state variables here
             - Pre-compute anything that doesn't change during the game
+            - Use opponent_teams to set up per-opponent tracking/modeling
         """
         # Required attributes (DO NOT REMOVE)
         self.team_id = team_id
         self.valuation_vector = valuation_vector
         self.budget = budget
         self.initial_budget = budget
-        self.auction_items_sequence = auction_items_sequence
+        self.opponent_teams = opponent_teams
         self.utility = 0
         self.items_won = []
         
         # Game state tracking
         self.rounds_completed = 0
-        self.total_rounds = len(auction_items_sequence)
+        self.total_rounds = 15  # Always 15 rounds per game
         
         # TODO: Add your custom state variables here
         # Examples:
         # self.price_history = []          # Track observed prices
-        # self.opponent_wins = {}           # Track which opponents are winning
-        # self.my_beliefs = {}              # Bayesian beliefs about opponents
+        # self.opponent_wins = {opp: [] for opp in opponent_teams}  # Track which opponents win what
+        # self.opponent_bids = {opp: [] for opp in opponent_teams}  # Infer opponent bidding patterns
+        # self.beliefs = {opp: {} for opp in opponent_teams}        # Bayesian beliefs per opponent
         # self.high_value_threshold = 12.0  # Classify items
         # self.low_value_threshold = 8.0
         

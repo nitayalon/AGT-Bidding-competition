@@ -50,7 +50,7 @@ class AgentManager:
     def load_agent(self, file_path: str, team_id: str, 
                    valuation_vector: Dict[str, float],
                    budget: float, 
-                   auction_items_sequence: list) -> Optional[BiddingAgent]:
+                   opponent_teams: list) -> Optional[BiddingAgent]:
         """
         Dynamically load and instantiate a team's bidding agent.
         
@@ -59,7 +59,7 @@ class AgentManager:
             team_id: Unique team identifier
             valuation_vector: Item valuations for this game
             budget: Initial budget
-            auction_items_sequence: List of items to be auctioned
+            opponent_teams: List of opponent team IDs in the same arena
         
         Returns:
             Instantiated BiddingAgent or None if loading failed
@@ -90,7 +90,7 @@ class AgentManager:
             agent_class = getattr(module, 'BiddingAgent')
             
             # Instantiate agent
-            agent = agent_class(team_id, valuation_vector, budget, auction_items_sequence)
+            agent = agent_class(team_id, valuation_vector, budget, opponent_teams)
             
             # Validate agent
             if not self.validate_agent(agent):
@@ -184,8 +184,10 @@ class AgentManager:
             try:
                 status, result = result_queue.get_nowait()
                 if status == 'success':
-                    logger.debug(f"Team {agent.team_id}: Bid {result:.2f} in {execution_time:.3f}s")
-                    return result, execution_time, None
+                    # Round bid to 2 decimal places
+                    rounded_bid = round(float(result), 2)
+                    logger.debug(f"Team {agent.team_id}: Bid {rounded_bid:.2f} in {execution_time:.3f}s")
+                    return rounded_bid, execution_time, None
                 else:
                     logger.error(f"Team {agent.team_id}: Bid execution error: {result}")
                     return 0.0, execution_time, f"Error: {result}"

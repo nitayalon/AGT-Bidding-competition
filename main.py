@@ -197,12 +197,13 @@ def validate_agent(agent_file: str):
     
     # Try to load agent
     agent_manager = AgentManager()
+    opponent_teams = []  # Empty for validation since no actual opponents
     agent = agent_manager.load_agent(
         file_path=agent_file,
         team_id=team_id,
         valuation_vector=valuation_vector,
         budget=INITIAL_BUDGET,
-        auction_items_sequence=auction_sequence
+        opponent_teams=opponent_teams
     )
     
     if agent is None:

@@ -43,8 +43,9 @@ python simulator.py --your-agent teams/my_team/bidding_agent.py --num-games 10
 
 ```python
 class BiddingAgent:
-    def __init__(self, team_id, valuation_vector, budget, auction_items_sequence):
+    def __init__(self, team_id, valuation_vector, budget, opponent_teams):
         # Initialize your state
+        # opponent_teams = list of opponent IDs
         
     def bidding_function(self, item_id) -> float:
         # Return your bid (0 to budget)
@@ -57,7 +58,7 @@ class BiddingAgent:
 
 | Constraint | Value | Consequence if Violated |
 |------------|-------|------------------------|
-| Execution Time | 2 seconds | Bid = 0 |
+| Execution Time | 3 seconds | Bid = 0 |
 | Budget | 60 per game | Bids capped automatically |
 | Return Type | float | Bid = 0 |
 | Dependencies | stdlib, numpy, scipy | Import error |
@@ -66,8 +67,9 @@ class BiddingAgent:
 
 **At Game Start:**
 - ✓ Your valuations for all 20 items
-- ✓ Which 15 items will be auctioned
 - ✓ Your budget (60)
+- ✓ Opponent team IDs
+- ✗ Which 15 items will be auctioned (learned online)
 - ✗ Order of auctions
 - ✗ Other teams' valuations
 
@@ -179,7 +181,7 @@ python main.py --mode validate --validate teams/my_team/bidding_agent.py
 python simulator.py --your-agent teams/my_team/bidding_agent.py --num-games 3
 
 # Thorough test (50 games, reproducible)
-python simulator.py --your-agent teams/my_team/bidding_agent.py --num-games 50 --seed 42
+python simulator.py --your-agent teams/my_team/bidding_agent.py --num-games 50 --seed 6431
 
 # Test against specific opponent
 python simulator.py --your-agent teams/my_team/bidding_agent.py \
@@ -315,3 +317,5 @@ python simulator.py --your-agent teams/my_team/bidding_agent.py --num-games 50
 ```
 
 **Good luck! 🏆**
+
+

@@ -11,12 +11,12 @@ class BiddingAgent:
     """Strategic bidding with simple opponent modeling"""
     
     def __init__(self, team_id: str, valuation_vector: Dict[str, float], 
-                 budget: float, auction_items_sequence: List[str]):
+                 budget: float, opponent_teams: List[str]):
         self.team_id = team_id
         self.valuation_vector = valuation_vector
         self.budget = budget
         self.initial_budget = budget
-        self.auction_items_sequence = auction_items_sequence
+        self.opponent_teams = opponent_teams
         self.utility = 0
         self.items_won = []
         self.rounds_completed = 0
@@ -66,7 +66,7 @@ class BiddingAgent:
             max_price = 10.0
         
         # Rounds remaining
-        total_rounds = len(self.auction_items_sequence)
+        total_rounds = 15  # Always 15 rounds per game
         rounds_remaining = total_rounds - self.rounds_completed
         
         if rounds_remaining == 0:

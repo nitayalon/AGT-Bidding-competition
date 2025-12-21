@@ -10,12 +10,12 @@ class BiddingAgent:
     """Truthful bidding strategy - always bid your true valuation"""
     
     def __init__(self, team_id: str, valuation_vector: Dict[str, float], 
-                 budget: float, auction_items_sequence: List[str]):
+                 budget: float, opponent_teams: List[str]):
         self.team_id = team_id
         self.valuation_vector = valuation_vector
         self.budget = budget
         self.initial_budget = budget
-        self.auction_items_sequence = auction_items_sequence
+        self.opponent_teams = opponent_teams
         self.utility = 0
         self.items_won = []
     

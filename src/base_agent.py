@@ -13,7 +13,7 @@ class BiddingAgent:
     """
     
     def __init__(self, team_id: str, valuation_vector: Dict[str, float], 
-                 budget: float, auction_items_sequence: List[str]):
+                 budget: float, opponent_teams: List[str]):
         """
         Initialize the bidding agent.
         
@@ -22,21 +22,22 @@ class BiddingAgent:
             valuation_vector: Dictionary mapping item_id to valuation
                              e.g., {"item_0": 15.3, "item_1": 8.2, ...}
             budget: Initial budget (typically 60)
-            auction_items_sequence: List of item_ids that will be auctioned (15 items)
-                                   Note: You know WHICH items but not the ORDER
+            opponent_teams: List of opponent team IDs in the same arena
+                           e.g., ["Team_A", "Team_B", "Team_C", "Team_D"]
+                           This helps you track and model opponent behavior
         """
         self.team_id = team_id
         self.valuation_vector = valuation_vector
         self.budget = budget
         self.initial_budget = budget
-        self.auction_items_sequence = auction_items_sequence
+        self.opponent_teams = opponent_teams
         self.utility = 0
         self.items_won = []
         
         # Students can add custom attributes here for their strategy
         # Examples:
-        # self.beliefs = {}  # For Bayesian updates
-        # self.opponent_models = {}
+        # self.beliefs = {team_id: {} for team_id in opponent_teams}  # For Bayesian updates
+        # self.opponent_bid_history = {team_id: [] for team_id in opponent_teams}
         # self.round_history = []
     
     def _update_available_budget(self, item_id: str, winning_team: str, price_paid: float):
