@@ -1,6 +1,6 @@
 """
 Tournament Manager for AGT Competition
-Manages tournament stages and arenas222
+Manages tournament stages and arenas
 """
 
 import logging
