@@ -36,17 +36,41 @@ env/
 *~
 .DS_Store
 
-# Competition-specific
-logs/*.json
-logs/*.txt
-results/*.json
-results/*.csv
-results/stage1/
-results/stage2/
+# Competition-specific data (should be in parent directory, not in reusable package)
+logs/
+results/
+results_backup*/
+teams/
+arena_configs/
+agent_filenames.json
+
+# Analysis scripts (course-specific, not part of reusable framework)
+comprehensive_analysis.py
+analyze_strategies.py
+create_presentation.py
+analyze_stage1.py
+stage1_interactive_report.py
+stage2_detailed_analysis.py
+quick_stage1_analysis.py
+create_arena_summaries.py
+create_stage2_summary.py
+complete_competition.py
+generate_arena_configs.py
+run_full_competition.ps1
+debug_*.py
+check_*.py
+verify_*.py
+
+# Generated reports (should be in parent directory)
+*.html
+*.pdf
+*.txt
+WINNING_STRATEGIES_ANALYSIS.md
 
 # Keep directory structure
 !logs/.gitkeep
 !results/.gitkeep
+!teams/.gitkeep
 
 # Student submissions (uncomment if you don't want to track teams)
 # teams/*/

@@ -17,8 +17,8 @@ LOW_VALUE_RANGE = (1, 10)
 MIXED_VALUE_RANGE = (1, 20)
 
 # Competition Structure
-STAGE1_GAMES = 5
-STAGE2_GAMES = 5
+STAGE1_GAMES = 25
+STAGE2_GAMES = 25
 ARENA_SIZE = 5
 
 # Execution Limits

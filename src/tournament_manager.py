@@ -90,7 +90,8 @@ class TournamentManager:
         return arenas
     
     def run_arena_games(self, arena_id: str, arena_teams: List[Team], 
-                       stage: int, num_games: int, fixed_valuations: Dict = None) -> List[GameResult]:
+                       stage: int, num_games: int, fixed_valuations: Dict = None,
+                       game_valuation_seeds: List[int] = None) -> List[GameResult]:
         """
         Run all games for a single arena.
         
@@ -99,7 +100,8 @@ class TournamentManager:
             arena_teams: List of teams in this arena
             stage: Competition stage (1 or 2)
             num_games: Number of games to run
-            fixed_valuations: Optional pre-generated valuations to use for all games in this arena
+            fixed_valuations: Optional pre-generated valuations to use for all games (DEPRECATED)
+            game_valuation_seeds: List of seeds, one per game, to generate unique valuations per game
         
         Returns:
             List of GameResult objects
@@ -110,17 +112,32 @@ class TournamentManager:
         
         # Prepare team_agents mapping
         team_agents = {team.team_id: team.agent_file_path for team in arena_teams}
+        team_ids = [team.team_id for team in arena_teams]
         
-        # Generate valuations once for this arena if not provided
-        if fixed_valuations is None:
-            team_ids = [team.team_id for team in arena_teams]
+        # Determine how to handle valuations
+        if game_valuation_seeds is not None:
+            logger.info(f"Using {len(game_valuation_seeds)} unique seeds for game valuations")
+            use_per_game_valuations = True
+        elif fixed_valuations is None:
+            # Old behavior: generate once for arena
             fixed_valuations, _ = self.valuation_generator.generate_arena_valuations(team_ids)
             logger.info(f"Generated fixed valuations for arena {arena_id}")
+            use_per_game_valuations = False
         else:
             logger.info(f"Using pre-generated fixed valuations for arena {arena_id}")
+            use_per_game_valuations = False
         
         for game_num in range(1, num_games + 1):
             try:
+                # Generate unique valuations for this game if using seeds
+                if use_per_game_valuations:
+                    game_seed = game_valuation_seeds[game_num - 1]
+                    game_val_gen = ValuationGenerator(random_seed=game_seed)
+                    game_valuations, _ = game_val_gen.generate_arena_valuations(team_ids)
+                    logger.info(f"Game {game_num}: Generated valuations with seed {game_seed}")
+                else:
+                    game_valuations = fixed_valuations
+                
                 # Create fresh instances for each game
                 auction_engine = AuctionEngine()
                 agent_manager = AgentManager(timeout_seconds=self.timeout_seconds)
@@ -132,7 +149,7 @@ class TournamentManager:
                     valuation_generator=self.valuation_generator,
                     auction_engine=auction_engine,
                     agent_manager=agent_manager,
-                    fixed_valuations=fixed_valuations  # Pass fixed valuations to each game
+                    fixed_valuations=game_valuations  # Pass game-specific valuations
                 )
                 
                 # Run the game
@@ -261,6 +278,8 @@ class TournamentManager:
             logger.info(f"Generated fixed valuations for Arena {arena_id}")
         
         # Run games for each arena
+        # Note: Cannot parallelize arenas on Windows due to multiprocessing spawn overhead
+        # Each arena already uses multiprocessing for agent isolation, which is sufficient
         arena_results = {}
         arena_winners = []
         
@@ -270,7 +289,7 @@ class TournamentManager:
                 arena_teams=arena_teams,
                 stage=1,
                 num_games=STAGE1_GAMES,
-                fixed_valuations=self.stage1_valuations[arena_id]  # Pass fixed valuations
+                fixed_valuations=self.stage1_valuations[arena_id]
             )
             
             arena_results[arena_id] = game_results

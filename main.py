@@ -145,17 +145,30 @@ def load_teams_from_directory(teams_dir: str, registration_file: str = None) -> 
         registration_file = teams_path / "team_registration.json"
     team_members_map = load_team_registration(str(registration_file))
     
+    # Load agent filename mapping
+    agent_filenames_file = teams_path.parent / "agent_filenames.json"
+    agent_filenames = {}
+    if agent_filenames_file.exists():
+        import json
+        with open(agent_filenames_file, 'r', encoding='utf-8') as f:
+            agent_filenames = json.load(f)
+        logging.info(f"Loaded agent filenames for {len(agent_filenames)} teams")
+    
     for team_dir in teams_path.iterdir():
         if not team_dir.is_dir():
             continue
         
-        agent_file = team_dir / "bidding_agent.py"
+        team_name = team_dir.name
+        
+        # Get agent filename from mapping, or look for bidding_agent.py as fallback
+        agent_filename = agent_filenames.get(team_name, "bidding_agent.py")
+        agent_file = team_dir / agent_filename
+        
         if not agent_file.exists():
-            logging.warning(f"No bidding_agent.py found in {team_dir}")
+            logging.warning(f"Agent file {agent_filename} not found in {team_dir}")
             continue
         
         # Get member IDs from registration
-        team_name = team_dir.name
         members = team_members_map.get(team_name, [])
         
         team = Team(

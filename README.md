@@ -1,6 +1,18 @@
 # 🎯 AGT Auto-Bidding Competition - Student Package
 
-Welcome to the AGT 2025-2026 Auto-Bidding Challenge!
+Welcome to the AGT Auto-Bidding Challenge!
+
+## 📁 Directory Structure
+
+This package contains the **reusable competition framework** for students:
+- `src/` - Core competition engine
+- `examples/` - Example bidding agents  
+- `tests/` - Test suite
+- `AGENT_TEMPLATE.py` - Template for student agents
+- `STUDENT_GUIDE.md` - Complete implementation guide
+- `QUICK_REFERENCE.md` - Quick reference
+
+**Note:** When you run the competition, course-specific data (results, logs, teams, reports) will be created in the **parent directory**, keeping this package clean and reusable for future courses.
 
 ## 🚀 Quick Start
 
